@@ -1,7 +1,7 @@
 # cloud-aws-azure-lab
 
 
-comming soon...
+comming soon....
 
 # 10 AI Projects on AWS to Build Job Ready Profile
 
