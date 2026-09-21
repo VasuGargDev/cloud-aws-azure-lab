@@ -280,3 +280,80 @@ vasugarg@Vasus-MacBook-Pro Downloads % ssh -i "pathnex-ec2-key.pem" ec2-user@3.1
          _/ _/
        _/m/'
 [ec2-user@ip-172-31-13-90 ~]$ 
+
+
+
+
+
+
+MISCLENEOUS:-TROUBLESHOOTING 
+DOCUMENTATION FOR THE SSH ERROR 
+
+
+{{ 
+Source of solution: https://www.youtube.com/watch?v=nJxijyrzteg
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnectionTimeout
+
+}}
+
+Did you manage to resolve your ssh issue to your ec2 instance?
+
+I also encountered ssh login issues while setting up my first ec2 instance.
+
+Here was how I resolved my ssh login issue:
+- with your instance's security group, set your inbound SSH rule's Source IP to 0.0.0.0/0 first, and make sure you can get a working connection with this setting. Once you have your ssh connection working, you can then tighten access by changing Source IP to the IP range of the machine you are logging in from. Note that if this machine has a non-static public IP, then you will frequently have to change the Source IP setting for your SSH rule.
+
+- I have noticed from my own experience that it I try to ssh to my new instance without waiting for its status checks to complete, I would encounter a ssh timeout issue. This was especially true for a newly created instances. In your AWS console, there should be a
+'State' and 'Status Checks' column for each of your instance. Make sure the 'State' entry for your instance shows 'running' (with a green circle next to it), and the 'Status Checks' entry shows '2/2 checks passed' (with a green circle and white tick). This could take awhile at times - so go get some snacks, then come back and try logging in again.
+
+- I have found enabling ssh verbosity when helpful for debugging ssh issues too. Try this command to enable verbosity: ssh -vv -i private_key.pem root@my_instance_public_domain
+
+- pinging your instance's public FQDN may also help, but make sure your instance's Security Group rules are set to allow ICMP traffic.
+
+- trying to telnet to port 22 of your instance's public FQDN may also help with troubleshooting. e.g. telnet my instance _public_domain 22
+
+
+------
+
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnection
+then you also need a route that sends all traffic destined outside the VPC (0.0.0.0/0) to the Internet gateway for the
+
+
+
+
+
++++++++++++++++++++++++
+
+
+MISC. TROUBLESHOOTING::
+
+Inbound rule
+
+![1789969739058](image/AWSandIAM/1789969739058.png)
+
+I have set the inbound rules as shown in the screen shot. 
+Type:All trafffic and Source: Anywhere (ipv4) 
+ I am able to connect to my EC2 instance using the command: 
+ssh -i "pathnex-ec2-key.pem" ec2-user@13.201.100.174 
+
+ But when I change the security group Source to My IP, it does not allow me to connect and gives the error: 
+ssh: connect to host 13.201.100.174 port 22: Operation timed out
+
+
+Outbound rule:
+
+![1789969813475](image/AWSandIAM/1789969813475.png)
+
+All traffic → 0.0.0.0/0
+means Your EC2 instance can send traffic anywhere. This is DEFAULT CORRECT and not related to SSH failures 
+
+
+
+
+🚨 Your issue is still here
+Based on everything you've shown so far, the real issue is:
+❗ Your IP is changing / not matching the allowed IP
+That’s why:
+0.0.0.0/0 → works
+My IP → fails with timeout
+
